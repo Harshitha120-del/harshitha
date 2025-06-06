@@ -1,0 +1,86 @@
+import java.util.*;
+
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int val) { this.val = val; }
+}
+
+class TreeNode {
+    int val;
+    TreeNode left, right;
+    TreeNode(int val) { this.val = val; }
+}
+
+public class Main {
+
+    public TreeNode sortedListToBST(ListNode head) {
+        if (head == null) return null;
+        if (head.next == null) return new TreeNode(head.val);
+
+        ListNode slow = head, fast = head, prev = null;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        TreeNode root = new TreeNode(slow.val);
+
+        // Cut the list at prev
+        if (prev != null) {
+            prev.next = null;
+            root.left = sortedListToBST(head);  // left sublist
+        }
+
+        root.right = sortedListToBST(slow.next);  // right sublist
+
+        return root;
+    }
+
+    // Helper to build linked list from array
+    public static ListNode buildList(int[] arr) {
+        ListNode dummy = new ListNode(0);
+        ListNode curr = dummy;
+        for (int val : arr) {
+            curr.next = new ListNode(val);
+            curr = curr.next;
+        }
+        return dummy.next;
+    }
+
+    // Level-order traversal for output
+    public static List<Integer> levelOrder(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        if (root == null) return res;
+
+        q.add(root);
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            if (node != null) {
+                res.add(node.val);
+                q.add(node.left);
+                q.add(node.right);
+            } else {
+                res.add(null);
+            }
+        }
+
+        // Trim trailing nulls
+        while (!res.isEmpty() && res.get(res.size() - 1) == null)
+            res.remove(res.size() - 1);
+
+        return res;
+    }
+
+    public static void main(String[] args) {
+        int[] input = {-10, -3, 0, 5, 9};
+        ListNode head = buildList(input);
+
+        Main sol = new Main();
+        TreeNode root = sol.sortedListToBST(head);
+
+        System.out.println(levelOrder(root));  // Output: [0, -3, 9, -10, null, 5]
+    }
+}
